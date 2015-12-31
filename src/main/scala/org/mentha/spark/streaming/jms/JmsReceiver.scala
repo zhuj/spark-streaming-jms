@@ -9,14 +9,14 @@ import javax.{jms => jms}
   *
   * {{{
   *  val sc: SparkContext = SparkContext.getOrCreate(conf)
-  *  val scc: StreamingContext = new StreamingContext(sc, Seconds(10))
+  *  val ssc: StreamingContext = new StreamingContext(sc, Seconds(10))
   *
   *  val brokerURL = "tcp://localhost:61616"
   *  val username = "admin"
   *  val password = "admin"
   *  val queueName = "testQueue"
   *
-  *  val stream: InputDStream[String] = scc.receiverStream(new JmsReceiver(
+  *  val stream: InputDStream[String] = ssc.receiverStream(new JmsReceiver(
   *    queueName = queueName,
   *    transformer = { msg => msg.asInstanceOf[javax.jms.TextMessage].getText() },
   *    connectionProvider = { () => {
@@ -29,8 +29,8 @@ import javax.{jms => jms}
   *
   *  ...
   *
-  *  scc.start()
-  *  scc.awaitTermination()
+  *  ssc.start()
+  *  ssc.awaitTermination()
   * }}}
   *
   * @param connectionProvider provides [[jms.Connection]] for the receiver.
@@ -80,7 +80,7 @@ class JmsReceiver[T] (
   }
 
   protected def process(exception: jms.JMSException): Unit = {
-    reportError(exception.getMessage, exception)
+    reportError(exception.getMessage(), exception)
   }
 
   override def onStart(): Unit = {

@@ -4,14 +4,14 @@ Simple JMS Receiver for [Apache Spark Streaming](http://spark.apache.org/streami
 Usage example:
 ```
  val sc: SparkContext = SparkContext.getOrCreate(conf)
- val scc: StreamingContext = new StreamingContext(sc, Seconds(1))
+ val ssc: StreamingContext = new StreamingContext(sc, Seconds(1))
  
  val brokerURL = "tcp://localhost:61616"
  val username = "admin"
  val password = "admin"
  val queueName = "testQueue"
  
- val stream: InputDStream[String] = scc.receiverStream(new JmsReceiver(
+ val stream: InputDStream[String] = ssc.receiverStream(new JmsReceiver(
    queueName = queueName,
    transformer = { msg => msg.asInstanceOf[javax.jms.TextMessage].getText() },
    connectionProvider = { () => {
@@ -24,6 +24,6 @@ Usage example:
  
  ...
  
- scc.start()
- scc.awaitTermination()
+ ssc.start()
+ ssc.awaitTermination()
 ```
