@@ -69,7 +69,7 @@ class JmsReceiverSuite extends FunSuite with Logging with Eventually with Before
 
     @volatile var receiveMessage: List[String] = List()
     stream.foreachRDD { rdd =>
-      if (rdd.collect.length > 0) {
+      if (!rdd.isEmpty()) {
         receiveMessage = receiveMessage ::: List(rdd.first)
         receiveMessage
       }
@@ -100,12 +100,28 @@ class JmsReceiverSuite extends FunSuite with Logging with Eventually with Before
     val destination = session.createQueue(queueName)
 
     val producer =  session.createProducer(destination)
-    val message = session.createTextMessage(msg)
+    c.start()
 
+    val message = session.createTextMessage(msg)
     producer.send(message)
 
-    c.start()
     c.close()
   }
+
+}
+
+private[jms] object JmsReceiverUtils {
+
+  def receiver(queueName: String, brokerUri: String) = new JmsReceiver(
+    queueName = queueName,
+    transformer = { msg => msg.asInstanceOf[javax.jms.TextMessage].getText() },
+    connectionProvider = { () => {
+      val cf = new org.apache.activemq.ActiveMQConnectionFactory(brokerUri)
+      cf.setOptimizeAcknowledge(true)
+      cf.setSendAcksAsync(true)
+      cf.createConnection()
+    }
+    }
+  )
 
 }
