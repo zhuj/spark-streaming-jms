@@ -1,7 +1,7 @@
 # spark-streaming-jms
-Simple JMS Receiver for [Apache Spark Streaming](http://spark.apache.org/streaming/).
+Simple JMS Receiver for [Apache Spark Streaming](http://spark.apache.org/docs/1.5.2/streaming-programming-guide.html).
 
-Usage example:
+Usage example (see [Example.scala](src/test/scala/org/mentha/spark/streaming/jms/Example.scala) for details):
 ```
  case class Message(
   messageId: String,
@@ -18,7 +18,7 @@ Usage example:
   val cf = new org.apache.activemq.ActiveMQConnectionFactory(brokerURL)
   cf.setOptimizeAcknowledge(true)
 
-  def receiver() = new JmsReceiver[Message](
+  def receiver() = new JmsQueueReceiver[Message](
    queueName = queueName,
    transformer = msg => Message(
     messageId = msg.getJMSMessageID(),
@@ -41,7 +41,6 @@ Usage example:
  ...
  
  val stream: DStream[Message] = ActiveMQStream.stream(ssc)
-  .union(ActiveMQStream.stream(ssc)) // it's possible to union several streams 
  
  ...
  

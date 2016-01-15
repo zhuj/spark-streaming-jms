@@ -6,86 +6,31 @@
 
     <groupId>org.mentha.spark</groupId>
     <artifactId>spark-streaming-jms</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <scala.maven.plugin.version>2.15.2</scala.maven.plugin.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scala.version>${scala.binary.version}.7</scala.version>
-        <scala.scope>provided</scala.scope>
+        <scala.binary.version>2.10</scala.binary.version>
+        <scala.version>2.10.6</scala.version>
 
         <spark.version>1.5.2</spark.version>
+        <scala.scope>provided</scala.scope>
         <spark.scope>provided</spark.scope>
     </properties>
 
     <profiles>
         <profile>
-            <id>local</id>
+            <id>scala-2.11</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
-                <scala.scope>compile</scala.scope>
-                <spark.scope>compile</spark.scope>
+                <scala.binary.version>2.11</scala.binary.version>
+                <scala.version>2.11.7</scala.version>
             </properties>
-        </profile>
-        <profile>
-            <id>testing</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.spark</groupId>
-                    <artifactId>spark-core_${scala.binary.version}</artifactId>
-                    <version>${spark.version}</version>
-                    <type>test-jar</type>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.spark</groupId>
-                    <artifactId>spark-sql_${scala.binary.version}</artifactId>
-                    <version>${spark.version}</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.scalatest</groupId>
-                    <artifactId>scalatest_${scala.binary.version}</artifactId>
-                    <version>2.2.1</version>
-                    <scope>test</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.activemq</groupId>
-                    <artifactId>activemq-core</artifactId>
-                    <version>5.7.0</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.scalatest</groupId>
-                        <artifactId>scalatest-maven-plugin</artifactId>
-                        <version>1.0</version>
-                        <configuration>
-                            <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>test</id>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                </plugins>
-            </build>
         </profile>
     </profiles>
 
@@ -139,34 +84,106 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- testing !-->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binary.version}</artifactId>
+            <version>2.2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <classifier>scala-${scala.binary.version}</classifier>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.3</version>
                     <configuration>
                         <source>1.7</source>
                         <target>1.7</target>
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.4</version>
+                    <groupId>net.alchim31.maven</groupId>
+                    <artifactId>scala-maven-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>scala-compile</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <phase>compile</phase>
+                        </execution>
+                        <execution>
+                            <id>scala-test-compile</id>
+                            <goals>
+                                <goal>testCompile</goal>
+                            </goals>
+                            <phase>test-compile</phase>
+                        </execution>
+                        <execution>
+                            <id>scala-doc-jar</id>
+                            <goals>
+                                <goal>doc-jar</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <scalaVersion>${scala.version}</scalaVersion>
+                    </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.scala-tools</groupId>
-                    <artifactId>maven-scala-plugin</artifactId>
-                    <version>${scala.maven.plugin.version}</version>
+                    <groupId>org.scalatest</groupId>
+                    <artifactId>scalatest-maven-plugin</artifactId>
+                    <version>1.0</version>
+                    <executions>
+                        <execution>
+                            <id>scala-test</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.scalastyle</groupId>
                     <artifactId>scalastyle-maven-plugin</artifactId>
                     <version>0.8.0</version>
+                    <executions>
+                        <execution>
+                            <id>scala-style-check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>compile</phase>
+                        </execution>
+                    </executions>
                     <configuration>
                         <verbose>false</verbose>
                         <failOnViolation>true</failOnViolation>
@@ -174,8 +191,8 @@
                         <failOnWarning>false</failOnWarning>
                         <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
                         <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
-                        <configLocation>scalastyle-config.xml</configLocation>
-                        <outputFile>${basedir}/target/scalastyle-output.xml</outputFile>
+                        <configLocation>${basedir}/project/scalastyle_config.xml</configLocation>
+                        <outputFile>${basedir}/target/scalastyle_output.xml</outputFile>
                         <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
                         <outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
                     </configuration>
@@ -184,27 +201,16 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.scalastyle</groupId>
+                <artifactId>scalastyle-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
