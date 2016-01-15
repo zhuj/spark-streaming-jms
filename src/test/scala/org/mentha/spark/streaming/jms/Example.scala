@@ -88,7 +88,7 @@ object Example {
       ssc.receiverStream(ActiveMQStream.topic())
     ))
 
-    val basePath = "records/parquet"
+    val basePath = "target/spark/records/parquet"
     stream
       .foreachRDD { (rdd, time) => {
         if (!rdd.isEmpty()) {
@@ -101,6 +101,9 @@ object Example {
             .parquet(basePath + "/" + postfix)
         }
       }}
+
+    ssc.start()
+    ssc.awaitTermination()
 
   }
 
