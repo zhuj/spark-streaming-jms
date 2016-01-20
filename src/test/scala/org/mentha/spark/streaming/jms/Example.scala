@@ -58,14 +58,14 @@ object Example {
     }
 
     def queue(): Receiver[Record] = new AbstractJmsReceiver[Record]() {
-      val queueName = "testQueue?consumer.prefetchSize=128"
+      val queueName = "testQueue"
       override protected def buildConnection(): jms.Connection = ActiveMQStream.buildConnection()
       override protected def transform(message: jms.Message): Record = ActiveMQStream.transform(message)
       override protected def buildDestination(session: jms.Session): jms.Destination = session.createQueue(queueName)
     }
 
     def topic(): Receiver[Record] = new AbstractJmsReceiver[Record]() {
-      val topicName = "testQueue?consumer.prefetchSize=128"
+      val topicName = "testQueue"
       override protected def buildConnection(): jms.Connection = ActiveMQStream.buildConnection()
       override protected def transform(message: jms.Message): Record = ActiveMQStream.transform(message)
       override protected def buildDestination(session: jms.Session): jms.Destination = session.createTopic(topicName)
@@ -73,14 +73,18 @@ object Example {
 
   }
 
+  val batchDuration: Duration = Seconds(5)
+
   def main(args: Array[String]) {
 
     val conf: SparkConf = new SparkConf()
       .setAppName("Simple Application")
       .setMaster("local[8]")
+      .set("spark.cores.max", "8")
+      .set("spark.executor.cores", "8")
 
     val sc: SparkContext = SparkContext.getOrCreate(conf)
-    val ssc: StreamingContext = new StreamingContext(sc, Seconds(10))
+    val ssc: StreamingContext = new StreamingContext(sc, batchDuration)
 
     val stream: DStream[Record] =
     ssc.union(Seq(
@@ -88,11 +92,11 @@ object Example {
       ssc.receiverStream(ActiveMQStream.topic())
     ))
 
-    val basePath = "target/spark/records/parquet"
+    val basePath = "out/spark/records/parquet"
     stream
       .foreachRDD { (rdd, time) => {
         if (!rdd.isEmpty()) {
-          val postfix: String = new java.text.SimpleDateFormat("yyyy-MM-dd/hh-mm-ss").format(new Date(time.milliseconds))
+          val postfix: String = new java.text.SimpleDateFormat("yyyy-MM-dd/HH-mm-ss.S").format(new Date(time.milliseconds))
           SQLContext
             .getOrCreate(rdd.sparkContext)
             .createDataFrame(rdd)
@@ -103,8 +107,16 @@ object Example {
       }}
 
     ssc.start()
-    ssc.awaitTermination()
 
+    Thread.sleep(batchDuration.milliseconds)
+
+    ssc.stop(
+      stopSparkContext = false,
+      stopGracefully = true
+    )
+
+    ssc.awaitTermination()
+    sc.stop()
   }
 
 }

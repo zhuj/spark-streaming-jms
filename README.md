@@ -45,5 +45,4 @@ Usage example (see [Example.scala](src/test/scala/org/mentha/spark/streaming/jms
  ...
  
  ssc.start()
- ssc.awaitTermination()
 ```

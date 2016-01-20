@@ -74,7 +74,7 @@ class JmsReceiverSuite extends FunSuite with Logging with Eventually with Before
   }
 
   private val batchDuration = Milliseconds(100)
-  private val master = "local[4]"
+  private val master = "local[4]" // it's required to have at least 3 threads
   private val framework = this.getClass.getSimpleName
 
   private def publish(
