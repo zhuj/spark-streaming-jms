@@ -6,7 +6,7 @@
 
     <groupId>org.mentha.spark</groupId>
     <artifactId>spark-streaming-jms</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -16,7 +16,7 @@
         <scala.binary.version>2.10</scala.binary.version>
         <scala.version>2.10.6</scala.version>
 
-        <spark.version>1.5.2</spark.version>
+        <spark.version>1.6.0</spark.version>
         <scala.scope>provided</scala.scope>
         <spark.scope>provided</spark.scope>
     </properties>
